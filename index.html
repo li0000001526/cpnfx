@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="description" content="免费在线密码生成器：基于 Web Crypto 安全随机源（crypto.getRandomValues），支持长度 4-64、大小写/数字/符号选项、强度与熵值(bit)评估、历史记录与 AES-GCM 主密码加密保存，纯前端本地运行，提供简中/繁中/English/日本語界面。" />
+<meta name="keywords" content="密码生成器,在线密码生成器,强密码,随机密码,密码强度,熵值,AES-GCM 加密保存,密码历史记录,免费密码工具,password generator,strong password,random password,local crypto" />
+<link rel="canonical" href="https://cpnfx.li00000.xyz/" />
+<link rel="alternate" hreflang="zh-CN" href="https://cpnfx.li00000.xyz/?lang=zh" />
+<link rel="alternate" hreflang="zh-TW" href="https://cpnfx.li00000.xyz/?lang=zh-t" />
+<link rel="alternate" hreflang="en" href="https://cpnfx.li00000.xyz/?lang=en" />
+<link rel="alternate" hreflang="ja" href="https://cpnfx.li00000.xyz/?lang=ja" />
+<link rel="alternate" hreflang="x-default" href="https://cpnfx.li00000.xyz/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="密钥工坊 · 在线密码生成器（免费 / 本地 / 四语言）" />
+<meta property="og:description" content="纯前端本地密码生成：Web Crypto 安全随机源、强度与熵值评估、AES-GCM 加密历史记录，支持简中/繁中/English/日本語。" />
+<meta property="og:url" content="https://cpnfx.li00000.xyz/" />
+<meta property="og:site_name" content="密钥工坊 · 密码生成器" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:locale:alternate" content="zh_TW,en,ja_JP" />
+<meta name="twitter:card" content="summary" />
+<script type="application/ld+json">
+{"@context":"https://***@type":"WebApplication","name":"密钥工坊 · 密码生成器","alternateName":["在线密码生成器","强密码生成器","随机密码生成器","Password Generator"],"url":"https://cpnfx.li00000.xyz/","applicationCategory":"DeveloperApplication","operatingSystem":"Any","inLanguage":["zh-CN","zh-TW","en","ja"],"offers":{"@type":"Offer","price":"0","priceCurrency":"CNY"},"featureList":["基于 Web Crypto (crypto.getRandomValues) 的安全随机生成","长度 4–64 可调，大小写/数字/符号字符集","排除易混淆字符、不重复字符模式","实时强度与熵值 (bit) 评估","历史记录 + 可选 AES-GCM (PBKDF2 150k) 主密码加密保存","导出 CSV","简中/繁中/English/日本語 四语言界面"],"publisher":{"@type":"Organization","name":"li00000 在线工具集","url":"https://li00000.xyz/"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://***@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"为什么随机密码生成器比自己编的密码更安全？","acceptedAnswer":{"@type":"Answer","text":"人脑擅长记忆模式（生日、拼音、123456 式后缀），而撞库与离线破解专打这类规律。随机生成让每个字符独立且均匀分布：8 位约 51 bit，12 位约 77 bit，16 位约 103 bit，暴力成本随长度指数上升。规范参考 NIST SP 800-63B。"}},
+{"@type":"Question","name":"多长的密码才算强？","acceptedAnswer":{"@type":"Answer","text":"熵(bit) ≈ 长度 × log2(字符池)。86 字符池（大小写+数字+符号）下：8 位≈51 bit，12 位≈77 bit，16 位≈103 bit，24 位≈154 bit。建议登录类账号 ≥16 位，高价值账号（支付、主邮箱、SSH）≥24 位，且不跨站复用。"}},
+{"@type":"Question","name":"该不该用密码管理器？","acceptedAnswer":{"@type":"Answer","text":"建议用：它让每个账号使用唯一长密码变得可行。主流选择包括 Bitwarden（开源、可自托管）、1Password（跨平台体验好）、Google 密码管理器（Chrome 生态内置）。可用本工具批量生成后导出 CSV 导入。"}},
+{"@type":"Question","name":"本工具的历史记录安全吗？","acceptedAnswer":{"@type":"Answer","text":"历史默认明文保存在本机 localStorage，同设备其他用户可读；开启主密码加密保存后以 AES-GCM（PBKDF2 15 万次迭代）加密，密钥不出本机。请勿在公共或共享电脑上保存敏感口令。"}}
+]}
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>密钥工坊 · 密码生成器</title>
+<style>
+  :root{
+    /* 柔光玻璃主题：浅色通透 + 高饱和撞色点缀 */
+    --bg1:#f7f6fb;
+    --bg2:#eef0f8;
+    --panel:rgba(255,255,255,.62);
+    --panel2:rgba(255,255,255,.78);
+    --ink:#20223a;
+    --muted:#6b6f8d;
+    --line:rgba(255,255,255,.85);
+    --hair:rgba(33,38,80,.10);
+    --pink:#ff3d7f;
+    --cyan:#00c2a8;
+    --violet:#7c5cff;
+    --amber:#f5a524;
+    --green:#1bbf73;
+    --red:#ff5468;
+    --radius:18px;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --shadow:0 18px 48px rgba(40,30,90,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+    position:relative;
+    background:
+      radial-gradient(42% 50% at 14% 8%,  rgba(124,92,255,.18), transparent 60%),
+      radial-gradient(46% 46% at 92% 14%, rgba(0,194,168,.16),  transparent 60%),
+      radial-gradient(52% 52% at 78% 92%, rgba(255,61,127,.14),  transparent 62%),
+      radial-gradient(48% 52% at 18% 96%, rgba(245,165,36,.12),  transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    background-attachment:fixed;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:880px;margin:0 auto}
+  header.top{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .logo{
+    width:46px;height:46px;border-radius:14px;flex:none;
+    background:linear-gradient(135deg,var(--pink),var(--violet));
+    display:grid;place-items:center;font-size:24px;font-weight:800;color:#fff;
+    box-shadow:0 10px 26px rgba(124,92,255,.35);
+  }
+  h1{font-size:23px;margin:0;letter-spacing:.5px;font-weight:800}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+  .langsel{
+    margin-left:auto;appearance:none;-webkit-appearance:none;
+    background:rgba(255,255,255,.7) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6f8d' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+    border:1px solid var(--hair);color:var(--ink);border-radius:11px;
+    padding:9px 30px 9px 12px;font-size:13px;font-weight:600;cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .langsel:focus{outline:2px solid var(--violet);outline-offset:1px}
+  .sec{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+    margin-top:18px;
+    box-shadow:var(--shadow);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    backdrop-filter:blur(18px) saturate(140%);
+  }
+  .sec h2{margin:0 0 14px;font-size:16px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+
+  .warn{
+    display:flex;gap:12px;align-items:flex-start;
+    background:rgba(245,165,36,.12);
+    border:1px solid rgba(245,165,36,.40);
+    color:#9a6b12;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.6;
+    margin-top:14px;
+  }
+  .warn b{color:#b97f0e}
+
+  .pwbox{
+    display:flex;align-items:center;gap:10px;
+    background:var(--panel2);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .pw{
+    flex:1;font-family:var(--mono);font-size:20px;word-break:break-all;
+    line-height:1.4;color:var(--ink);min-height:26px;
+  }
+  .pw.empty{color:var(--muted)}
+  .btn{
+    border:none;cursor:pointer;font-weight:700;border-radius:11px;
+    padding:10px 14px;font-size:14px;color:#fff;transition:transform .06s ease, filter .15s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn:hover{filter:brightness(1.05);box-shadow:0 8px 20px rgba(60,40,120,.18)}
+  .btn.ghost{background:rgba(255,255,255,.6);color:var(--ink);border:1px solid var(--hair)}
+  .btn.pink{background:var(--pink)}
+  .btn.cyan{background:var(--cyan)}
+  .btn.violet{background:var(--violet)}
+  .btn:disabled{filter:grayscale(.6) brightness(.85);cursor:not-allowed}
+  .iconbtn{
+    border:1px solid var(--hair);background:rgba(255,255,255,.7);color:var(--ink);
+    width:42px;height:42px;border-radius:11px;cursor:pointer;font-size:18px;flex:none;transition:transform .06s ease, background .15s;
+  }
+  .iconbtn:active{transform:translateY(1px)}
+  .iconbtn:hover{background:#fff}
+
+  .row{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .lenlabel{font-size:14px;color:var(--muted)}
+  .lenval{font-family:var(--mono);font-size:18px;color:var(--violet);min-width:34px;text-align:right;font-weight:700}
+  input[type=range]{flex:1;accent-color:var(--violet);height:6px}
+
+  .opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+  @media(max-width:560px){.opts{grid-template-columns:1fr}}
+  .opt{
+    display:flex;align-items:center;gap:10px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;user-select:none;
+    font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .opt input{width:18px;height:18px;accent-color:var(--violet);cursor:pointer}
+  .opt .kv{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  .strength{margin-top:18px}
+  .bar{height:10px;border-radius:6px;background:rgba(33,38,80,.08);overflow:hidden;border:1px solid var(--hair)}
+  .bar > i{display:block;height:100%;width:0;transition:width .25s ease, background .25s ease}
+  .stxt{font-size:13px;margin-top:8px;color:var(--muted)}
+  .stxt b{font-family:var(--mono)}
+
+  .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+
+  .histop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .count{font-size:13px;color:var(--muted)}
+  .hist{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto}
+  .item{
+    display:flex;align-items:center;gap:10px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .item .p{font-family:var(--mono);font-size:14px;flex:1;word-break:break-all;color:var(--ink)}
+  .item .t{font-size:11px;color:var(--muted);white-space:nowrap}
+  .item .mini{border:1px solid var(--hair);background:rgba(255,255,255,.7);color:var(--ink);border-radius:8px;padding:5px 9px;cursor:pointer;font-size:12px}
+  .item .mini:active{transform:translateY(1px)}
+  .item .mini.del:hover{border-color:var(--red);color:var(--red)}
+  .empty-hist{color:var(--muted);font-size:13px;text-align:center;padding:24px 0}
+  .lockrow{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .lockrow input[type=password]{
+    background:rgba(255,255,255,.75);border:1px solid var(--hair);color:var(--ink);
+    border-radius:11px;padding:10px 12px;font-size:14px;flex:1;min-width:160px;
+  }
+  .lockrow input::placeholder{color:var(--muted)}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.7;position:relative;z-index:1}
+  footer code{color:var(--violet)}
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+    background:var(--green);color:#04261a;font-weight:700;padding:11px 18px;border-radius:12px;
+    opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;font-size:14px;z-index:50;
+    box-shadow:0 12px 30px rgba(27,191,115,.35);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* pwgen tabs ui */
+.tabs{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.tab{flex:1 1 150px;min-width:132px;border:1px solid var(--hair);background:rgba(255,255,255,.55);color:var(--muted);border-radius:13px;padding:11px 14px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:border-color .15s,background .15s,color .15s,box-shadow .15s}
+.tab:hover{border-color:var(--violet);color:var(--ink)}
+.tab.on{background:linear-gradient(135deg,var(--violet),var(--pink));border-color:transparent;color:#fff;box-shadow:0 10px 24px rgba(124,92,255,.35)}
+.tabpane{display:none}
+.tabpane.on{display:block;animation:pwin .18s ease}
+@keyframes pwin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.faq h3{margin:18px 0 6px;font-size:14.5px;color:var(--ink);font-weight:700}
+.faq .faqp,.faq .faqs{color:var(--muted);font-size:13.5px;line-height:1.75;margin:0}
+.faq a{color:var(--violet);font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(124,92,255,.4)}
+.faq a:hover{border-bottom-style:solid}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">⚿</div>
+    <div>
+      <h1 data-i18n="title">密钥工坊 · 密码生成器</h1>
+      <div class="sub" data-i18n="sub">纯前端 · 本地生成 · 可记录历史</div>
+    </div>
+    <select id="lang" class="langsel" aria-label="Language"></select>
+  </header>
+
+<div class="tabs" id="tabSwitch" role="tablist">
+  <button class="tab on" data-tab="gen" role="tab">⚡ <span data-i18n="tabGen">生成密码</span></button>
+  <button class="tab" data-tab="hist" role="tab">🕘 <span data-i18n="tabHist">历史记录</span></button>
+  <button class="tab" data-tab="faq" role="tab">🛡 <span data-i18n="tabFaq">安全 FAQ</span></button>
+</div>
+<div class="tabpane on" id="pane-gen">
+<div class="warn">
+    <span>🔐</span>
+    <div data-i18n="warn">安全说明：本工具完全在你的浏览器本地运行，密码不会上传任何服务器。历史记录默认以明文保存在本机 localStorage，同设备其他用户可读。如需更高安全，请开启下方的「主密码加密保存」（AES-GCM，密钥不出本机）。请勿在公共/共享电脑记录敏感账号密码。</div>
+<!-- 生成区 -->
+  <section class="sec">
+    <h2><span class="dot"></span><span data-i18n="secGen">生成密码</span></h2>
+    <div class="pwbox">
+      <div id="pw" class="pw empty" data-i18n="pwPlaceholder">点击「生成」创建密码</div>
+      <button class="iconbtn" id="copyBtn" title="复制">⧉</button>
+      <button class="iconbtn" id="genBtn" title="重新生成">⟳</button>
+    </div>
+
+    <div class="row">
+      <span class="lenlabel" data-i18n="len">长度</span>
+      <input type="range" id="len" min="4" max="64" value="16" />
+      <span class="lenval" id="lenVal">16</span>
+    </div>
+
+    <div class="opts">
+      <label class="opt"><input type="checkbox" id="cUpper" checked><span data-i18n="optUpper">大写字母 A-Z</span><span class="kv">26</span></label>
+      <label class="opt"><input type="checkbox" id="cLower" checked><span data-i18n="optLower">小写字母 a-z</span><span class="kv">26</span></label>
+      <label class="opt"><input type="checkbox" id="cNum" checked><span data-i18n="optNum">数字 0-9</span><span class="kv">10</span></label>
+      <label class="opt"><input type="checkbox" id="cSym" checked><span data-i18n="optSym">符号 !@#$%</span><span class="kv">24</span></label>
+      <label class="opt"><input type="checkbox" id="cNoAmb"><span data-i18n="optNoAmb">排除易混淆字符</span><span class="kv">0O1lI</span></label>
+      <label class="opt"><input type="checkbox" id="cNoDup"><span data-i18n="optNoDup">不重复字符</span><span class="kv">pool</span></label>
+    </div>
+
+    <div class="strength">
+      <div class="bar"><i id="bar"></i></div>
+      <div class="stxt"><span data-i18n="strength">强度</span>：<b id="stxt">—</b> · <span data-i18n="entropy">熵值</span> <b id="entropy">0</b> <span data-i18n="bit">bit</span></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn pink" id="genSave" data-i18n="genSave">生成并保存</button>
+      <button class="btn cyan" id="genOnly" data-i18n="genOnly">仅生成</button>
+      <button class="btn violet" id="fillBtn" data-i18n="fillBtn">填入主密码</button>
+    </div>
+  </section>
+</div>
+<div class="tabpane" id="pane-hist">
+<!-- 历史区 -->
+  <section class="sec">
+    <h2><span class="dot" style="background:var(--violet);box-shadow:0 0 10px var(--violet)"></span><span data-i18n="secHist">历史记录</span></h2>
+
+    <div class="lockrow">
+      <input type="password" id="master" data-i18n-ph="masterPlaceholder" placeholder="设置/输入主密码以加密保存（留空=明文）" autocomplete="off" />
+      <button class="btn ghost" id="lockState" data-i18n="lockOff">加密：关</button>
+    </div>
+
+    <div class="histop">
+      <span class="count" id="count">共 0 条</span>
+      <span style="flex:1"></span>
+      <button class="mini btn ghost" id="exportBtn" style="padding:8px 12px;font-size:13px" data-i18n="exportBtn">导出 CSV</button>
+      <button class="mini btn ghost" id="clearBtn" style="padding:8px 12px;font-size:13px;color:var(--red);border-color:var(--red)" data-i18n="clearBtn">清空</button>
+    </div>
+    <div class="hist" id="hist"><div class="empty-hist" data-i18n="emptyHist">还没有记录，先生成一个吧。</div></div>
+  </section>
+</div>
+<div class="tabpane" id="pane-faq">
+
+<!-- 安全FAQ区 -->
+<section class="sec faq">
+  <h2><span class="dot" style="background:var(--pink);box-shadow:0 0 10px var(--pink)"></span><span data-i18n="faqTitle">密码安全指南</span></h2>
+  <p class="faqs" data-i18n-html="faqSub">四个最常见的问题：随机生成为什么比自编更安全、多长才算「强」、该不该用密码管理器、本地历史记录如何保管。</p>
+  <h3 data-i18n="faqQ1">为什么随机密码生成器比自己编的密码更安全？</h3>
+  <p class="faqp" data-i18n-html="faqA1">人脑擅长记模式——生日、拼音、「123456」式后缀，而撞库与离线破解专打这类规律。随机生成让每个字符独立且均匀分布：8 位混合约 51 bit（已属弱），12 位约 77 bit（强），16 位约 103 bit（极强），暴力成本随长度指数上升。口令设计规范参考 <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>。</p>
+  <h3 data-i18n="faqQ2">多长的密码才算「强」？</h3>
+  <p class="faqp" data-i18n-html="faqA2">熵(bit) ≈ 长度 × log₂(字符池)。86 字符池（大小写+数字+符号）：8 位≈51 bit，12 位≈77 bit，16 位≈103 bit，24 位≈154 bit。经验值：登录类账号 ≥ 16 位；支付、主邮箱、SSH 等高价值账号 ≥ 24 位，且绝不跨站复用。更多标准见 <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP 认证安全清单</a>。</p>
+  <h3 data-i18n="faqQ3">该不该用密码管理器？</h3>
+  <p class="faqp" data-i18n-html="faqA3">建议用：它让「每个账号一个唯一长密码」可行——你只需记住一个主口令。主流选择：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（开源、可自托管）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（跨生态体验好）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google 密码管理器</a>（Chrome 生态开箱即用）。用本工具「生成并保存」批量生成后导出 CSV 即可导入。</p>
+  <h3 data-i18n="faqQ4">本工具的历史记录安全吗？</h3>
+  <p class="faqp" data-i18n-html="faqA4">历史默认以明文保存在本机 localStorage——同设备其他用户可读；开启「主密码加密保存」后以 AES-GCM（PBKDF2 15 万次迭代）加密，密钥不出本机。请勿在公共/共享电脑上保存敏感口令。</p>
+</section>
+</div>
+<footer id="foot" data-i18n-html="footer">所有计算在本地完成 · 随机源 <code>crypto.getRandomValues</code> · 数据存于本机浏览器<br/>本工具不收集任何信息。请妥善保管设备与主密码。</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- i18n ----------
+  var I18N = {
+    zh:{
+      tabGen:"生成密码", tabHist:"历史记录", tabFaq:"安全 FAQ",
+      faqTitle:"密码安全指南", faqSub:"四个最常见的问题：随机生成为什么比自编更安全、多长才算「强」、该不该用密码管理器、本地历史记录如何保管。",
+      faqQ1:"为什么随机密码生成器比自己编的密码更安全？", faqA1:'人脑擅长记模式——生日、拼音、「123456」式后缀，而撞库与离线破解专打这类规律。随机生成让每个字符独立且均匀分布：8 位混合约 51 bit（已属弱），12 位约 77 bit（强），16 位约 103 bit（极强），暴力成本随长度指数上升。口令设计规范参考 <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>。',
+      faqQ2:"多长的密码才算「强」？", faqA2:'熵(bit) ≈ 长度 × log₂(字符池)。86 字符池（大小写+数字+符号）：8 位≈51 bit，12 位≈77 bit，16 位≈103 bit，24 位≈154 bit。经验值：登录类账号 ≥ 16 位；支付、主邮箱、SSH 等高价值账号 ≥ 24 位，且绝不跨站复用。更多标准见 <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP 认证安全清单</a>。',
+      faqQ3:"该不该用密码管理器？", faqA3:'建议用：它让「每个账号一个唯一长密码」可行——你只需记住一个主口令。主流选择：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（开源、可自托管）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（跨生态体验好）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google 密码管理器</a>（Chrome 生态开箱即用）。用本工具「生成并保存」批量生成后导出 CSV 即可导入。',
+      faqQ4:"本工具的历史记录安全吗？", faqA4:'历史默认以明文保存在本机 localStorage——同设备其他用户可读；开启「主密码加密保存」后以 AES-GCM（PBKDF2 15 万次迭代）加密，密钥不出本机。请勿在公共/共享电脑上保存敏感口令。',
+
+      title:"密钥工坊 · 密码生成器", sub:"纯前端 · 本地生成 · 可记录历史",
+      warn:"安全说明：本工具完全在你的浏览器本地运行，密码不会上传任何服务器。历史记录默认以明文保存在本机 localStorage，同设备其他用户可读。如需更高安全，请开启下方的「主密码加密保存」（AES-GCM，密钥不出本机）。请勿在公共/共享电脑记录敏感账号密码。",
+      secGen:"生成密码", pwPlaceholder:"点击「生成」创建密码", len:"长度",
+      optUpper:"大写字母 A-Z", optLower:"小写字母 a-z", optNum:"数字 0-9", optSym:"符号 !@#$%",
+      optNoAmb:"排除易混淆字符", optNoDup:"不重复字符",
+      strength:"强度", entropy:"熵值", bit:"bit",
+      genSave:"生成并保存", genOnly:"仅生成", fillBtn:"填入主密码",
+      secHist:"历史记录", masterPlaceholder:"设置/输入主密码以加密保存（留空=明文）",
+      lockOff:"加密：关", lockOn:"加密：开", exportBtn:"导出 CSV", clearBtn:"清空",
+      emptyHist:"还没有记录，先生成一个吧。", lockedHist:"🔒 历史已加密，请输入主密码后刷新查看",
+      footer:"所有计算在本地完成 · 随机源 <code>crypto.getRandomValues</code> · 数据存于本机浏览器<br/>本工具不收集任何信息。请妥善保管设备与主密码。",
+      confirmClear:"确定清空全部历史记录？此操作不可恢复。",
+      saved:"已生成并保存", copied:"已复制", copyFail:"复制失败", needMaster:"请先输入主密码",
+      masterSet:"已在下方输入主密码", cleared:"已清空", noExport:"没有可导出的记录",
+      exported:"已导出 CSV（明文，注意保管）", wrongMaster:"主密码错误，无法解密历史",
+      noCharset:"请至少选择一种字符类型", dupTooLong:"去重模式下长度不能超过字符池({n})",
+      count:"共 {n} 条", encrypted:"已加密",
+      vWeak:"极弱", weak:"弱", mid:"中等", strong:"强", vStrong:"极强"
+    },
+    "zh-t":{
+      tabGen:"生成密碼", tabHist:"歷史記錄", tabFaq:"安全 FAQ",
+      faqTitle:"密碼安全指南", faqSub:"四個最常見的問題：隨機生成為何比自编更安全、多長才算「強」、該不該用密碼管理器、本機歷史記錄如何保管。",
+      faqQ1:"為什麼隨機密碼生成器比自编的密碼更安全？", faqA1:'大腦擅長記模式——生日、拼音、「123456」式結尾，而撞庫與離線破解專打這類規律。隨機生成讓每個字元獨立且均勻分布：8 位混合約 51 bit（已屬弱），12 位約 77 bit（強），16 位約 103 bit（極強），暴力成本隨長度指數上升。口令設計規範參考 <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>。',
+      faqQ2:"多長的密碼才算「強」？", faqA2:'熵(bit) ≈ 長度 × log₂(字元池)。86 字元池（大小寫+數字+符號）：8 位≈51 bit，12 位≈77 bit，16 位≈103 bit，24 位≈154 bit。經驗值：登入類帳號 ≥ 16 位；支付、主郵箱、SSH 等高價值帳號 ≥ 24 位，且絕不跨站重用。更多標準見 <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP 鑑別安全清單</a>。',
+      faqQ3:"該不該用密碼管理器？", faqA3:'建議用：它讓「每個帳號一個唯一長密碼」可行——你只需記住一個主口令。主流選擇：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（開源、可自託管）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（跨生態體驗佳）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google 密碼管理器</a>（Chrome 生態開箱即用）。用本工具「生成並保存」批量產生後匯出 CSV 即可導入。',
+      faqQ4:"本工具的歷史記錄安全嗎？", faqA4:'歷史預設以明文保存在本機 localStorage——同裝置其他使用者可讀；開啟「主密碼加密保存」後以 AES-GCM（PBKDF2 15 萬次迭代）加密，金鑰不出本機。請勿在公共／共用電腦上保存敏感口令。',
+
+      title:"密鑰工坊 · 密碼產生器", sub:"純前端 · 本地生成 · 可記錄歷史",
+      warn:"安全說明：本工具完全在你的瀏覽器本地運行，密碼不會上傳任何伺服器。歷史記錄預設以明文保存在本機 localStorage，同裝置其他使用者可讀。如需更高安全，請開啟下方的「主密碼加密保存」（AES-GCM，金鑰不出本機）。請勿在公共／共用電腦記錄敏感帳號密碼。",
+      secGen:"生成密碼", pwPlaceholder:"點擊「生成」建立密碼", len:"長度",
+      optUpper:"大寫字母 A-Z", optLower:"小寫字母 a-z", optNum:"數字 0-9", optSym:"符號 !@#$%",
+      optNoAmb:"排除易混淆字元", optNoDup:"不重複字元",
+      strength:"強度", entropy:"熵值", bit:"bit",
+      genSave:"生成並保存", genOnly:"僅生成", fillBtn:"填入主密碼",
+      secHist:"歷史記錄", masterPlaceholder:"設定／輸入主密碼以加密保存（留空＝明文）",
+      lockOff:"加密：關", lockOn:"加密：開", exportBtn:"匯出 CSV", clearBtn:"清空",
+      emptyHist:"還沒有記錄，先產生一個吧。", lockedHist:"🔒 歷史已加密，請輸入主密碼後重新整理查看",
+      footer:"所有計算在本地完成 · 隨機源 <code>crypto.getRandomValues</code> · 資料存於本機瀏覽器<br/>本工具不收集任何資訊。請妥善保管裝置與主密碼。",
+      confirmClear:"確定清空全部歷史記錄？此操作不可復原。",
+      saved:"已生成並保存", copied:"已複製", copyFail:"複製失敗", needMaster:"請先輸入主密碼",
+      masterSet:"已在下方輸入主密碼", cleared:"已清空", noExport:"沒有可匯出的記錄",
+      exported:"已匯出 CSV（明文，注意保管）", wrongMaster:"主密碼錯誤，無法解密歷史",
+      noCharset:"請至少選擇一種字元類型", dupTooLong:"去重模式下長度不能超過字元池({n})",
+      count:"共 {n} 條", encrypted:"已加密",
+      vWeak:"極弱", weak:"弱", mid:"中等", strong:"強", vStrong:"極強"
+    },
+    en:{
+      tabGen:"Generate", tabHist:"History", tabFaq:"Security FAQ",
+      faqTitle:"Password Security Guide", faqSub:"The four questions that matter: why random beats typed, how long is strong, should you use a password manager, and how local history is kept safe.",
+      faqQ1:"Why is a random generator safer than a password you make yourself?", faqA1:'Humans remember patterns — birthdays, pinyin, "123456" suffixes — and credential-stuffing and offline cracking target exactly those. A random generator keeps every character independent and uniform: 8 mixed chars ≈ 51 bits (already weak), 12 ≈ 77 bits (strong), 16 ≈ 103 bits (very strong); brute-force cost grows exponentially with length. For credential policy see <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>.',
+      faqQ2:"How long must a password be to count as strong?", faqA2:'Entropy (bits) ≈ length × log₂(pool). With the 86-char pool (upper + lower + digits + symbols): 8 ≈ 51 bits, 12 ≈ 77, 16 ≈ 103, 24 ≈ 154. Rules of thumb: ≥ 16 chars for login accounts; ≥ 24 for high-value ones (payments, primary inbox, SSH), and never reuse across sites. More standards: the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP Authentication Cheat Sheet</a>.',
+      faqQ3:"Should you use a password manager?", faqA3:'Yes — it makes a unique long password per account practical: you only memorize one master passphrase. Popular choices: <a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a> (open source, self-hostable), <a href="https://1password.com/" target="_blank" rel="noopener">1Password</a> (polished cross-platform), <a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google Password Manager</a> (built into Chrome). Generate a batch here with "Generate & Save", export CSV, and import it into the manager.',
+      faqQ4:"Is this tool's history safe?", faqA4:"History is stored in plaintext in your browser's localStorage by default — readable by anyone on this device. Enable encrypted save and it becomes AES-GCM (PBKDF2, 150,000 iterations); the key never leaves the device. Never keep sensitive credentials on public or shared computers.",
+
+      title:"KeyForge · Password Generator", sub:"Client-side · Local generation · History saved",
+      warn:"Security note: This tool runs entirely in your browser locally. Passwords are never uploaded to any server. History is stored in plaintext in this device's localStorage by default, readable by other users on the same device. For higher security, enable \"Encrypted save with master password\" below (AES-GCM, key never leaves device). Do not store sensitive credentials on public/shared computers.",
+      secGen:"Generate", pwPlaceholder:"Click \"Generate\" to create", len:"Length",
+      optUpper:"Uppercase A-Z", optLower:"Lowercase a-z", optNum:"Digits 0-9", optSym:"Symbols !@#$%",
+      optNoAmb:"Exclude ambiguous", optNoDup:"No duplicate chars",
+      strength:"Strength", entropy:"Entropy", bit:"bit",
+      genSave:"Generate & Save", genOnly:"Generate only", fillBtn:"Focus master pw",
+      secHist:"History", masterPlaceholder:"Set/enter master password to encrypt (blank = plaintext)",
+      lockOff:"Encrypt: off", lockOn:"Encrypt: on", exportBtn:"Export CSV", clearBtn:"Clear",
+      emptyHist:"No records yet — generate one first.", lockedHist:"🔒 History is encrypted — enter master password to view",
+      footer:"All computation runs locally · Random source <code>crypto.getRandomValues</code> · Data stored in this browser<br/>This tool collects no information. Keep your device and master password safe.",
+      confirmClear:"Clear all history? This cannot be undone.",
+      saved:"Generated & saved", copied:"Copied", copyFail:"Copy failed", needMaster:"Enter master password first",
+      masterSet:"Master password field focused", cleared:"Cleared", noExport:"Nothing to export",
+      exported:"CSV exported (plaintext — keep safe)", wrongMaster:"Wrong master password — cannot decrypt",
+      noCharset:"Select at least one character set", dupTooLong:"In no-duplicate mode length can't exceed pool ({n})",
+      count:"{n} entries", encrypted:"Encrypted",
+      vWeak:"Very weak", weak:"Weak", mid:"Medium", strong:"Strong", vStrong:"Very strong"
+    },
+    ja:{
+      tabGen:"生成", tabHist:"履歴", tabFaq:"セキュリティ FAQ",
+      faqTitle:"パスワード安全ガイド", faqSub:"よくある4つの疑問：なぜランダム生成が自编より安全か、どの長さが「強い」のか、パスワードマネージャを使うべきか、履歴の保管方法。",
+      faqQ1:"なぜランダム生成の方が自编のパスワードより安全？", faqA1:'人間はパターン（生年月日、ピンイン、「123456」の続き）を記憶しやすい。クレデンシャルスタッフィングやオフライン総当たり攻撃はまさにその類を狙います。ランダム生成は各文字を独立・均匀分布させます：8桁（86文字プール）≈51 bit（弱）、12桁≈77 bit（強）、16桁≈103 bit（極強）——長度が上がるほど総当たりコストは指数的に増えます。認証方針は <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a> を参照。',
+      faqQ2:"どの長さのパスワードが「強め」と言える？", faqA2:'エントロピー(bit) ≒ 長さ × log₂(文字プール)。86文字プール（大文字＋小文字＋数字＋記号）では：8桁≒51 bit、12桁≒77 bit、16桁≒103 bit、24桁≒154 bit。目安：ログイン用は16桁以上、高価値アカウント（決済・メインメール・SSH）は24桁以上、サイト横断での再利用は避けること。基準は <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP 認証チートシート</a>。',
+      faqQ3:"パスワードマネージャは使った方が良い？", faqA3:'はい。アカウントごとに固有の長いパスワードを実用化する助けになり、覚えておくのはマスターパスワード1つだけで済みます。主な選択肢：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（オープンソース・セルフホスト可）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（クロスプラットフォームで体験良好）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google パスワードマネージャ</a>（Chrome に標準搭載）。ここでは「生成して保存」でまとめて作り、CSV を出力してインポートするのがスムーズ。',
+      faqQ4:"このツールの履歴は安全？", faqA4:'履歴は標準で本体ブラウザの localStorage に平文保存——同一デバイスの他ユーザーが読める可能性があります。「マスターパスワードで暗号化保存」を有効化すると AES-GCM（PBKDF2・15万イテレーション）で暗号化され、鍵は端末外に出ません。公共・共有端末で重要な認証情報を保存しないでください。',
+
+      title:"キーフォージ · パスワード生成器", sub:"クライアント側 · ローカル生成 · 履歴保存",
+      warn:"セキュリティ注意：このツールはすべてブラウザ内（ローカル）で動作し、パスワードをサーバーに送信することはありません。履歴は標準で平文のまま本デバイスの localStorage に保存され、同一デバイスの他ユーザーが読める可能性があります。より安全にするには、下の「マスターパスワードで暗号化保存」（AES-GCM、鍵は端末外に出ない）を有効化してください。公共／共有端末で重要な認証情報を保存しないでください。",
+      secGen:"パスワード生成", pwPlaceholder:"「生成」を押して作成", len:"長さ",
+      optUpper:"大文字 A-Z", optLower:"小文字 a-z", optNum:"数字 0-9", optSym:"記号 !@#$%",
+      optNoAmb:"紛らわしい文字を除外", optNoDup:"重複なし",
+      strength:"強度", entropy:"エントロピー", bit:"bit",
+      genSave:"生成して保存", genOnly:"生成のみ", fillBtn:"マスター入力",
+      secHist:"履歴", masterPlaceholder:"暗号化用マスターパスワード（空＝平文）",
+      lockOff:"暗号化：オフ", lockOn:"暗号化：オン", exportBtn:"CSV出力", clearBtn:"クリア",
+      emptyHist:"まだ履歴がありません。生成してみてください。", lockedHist:"🔒 履歴は暗号化されています。マスターパスワードを入力してください",
+      footer:"すべてローカルで計算 · 乱数源 <code>crypto.getRandomValues</code> · データは本ブラウザに保存<br/>このツールは情報を収集しません。デバイスとマスターパスワードを安全に保管してください。",
+      confirmClear:"すべての履歴を削除しますか？元に戻せません。",
+      saved:"生成して保存しました", copied:"コピーしました", copyFail:"コピー失敗", needMaster:"まずマスターパスワードを入力",
+      masterSet:"マスター欄を選択しました", cleared:"削除しました", noExport:"出力する履歴がありません",
+      exported:"CSV出力済（平文・保管に注意）", wrongMaster:"マスターパスワードが違います",
+      noCharset:"文字種を1つ以上選択してください", dupTooLong:"重複なしモードでは長さは文字プール({n})以下",
+      count:"{n} 件", encrypted:"暗号化",
+      vWeak:"極弱", weak:"弱", mid:"中", strong:"強", vStrong:"極強"
+    }
+  };
+  var LANGS = { zh:"简体中文", "zh-t":"繁體中文", en:"English", ja:"日本語" };
+  var LANG_ATTR = { zh:"zh-CN", "zh-t":"zh-TW", en:"en", ja:"ja" };
+  var LANG_KEY = "pwgen.lang.v1";
+  var curLang = (function(){
+  var q=null; try{ q=new URLSearchParams(location.search).get("lang"); }catch(e){}
+  if(q && I18N[q]){ try{ localStorage.setItem(LANG_KEY, q); }catch(e2){} return q; }
+  try{ return localStorage.getItem(LANG_KEY) || "zh"; }catch(e){ return "zh"; }
+})();
+  if(!I18N[curLang]) curLang="zh";
+
+  function t(key, params){
+    var s = (I18N[curLang] && I18N[curLang][key]!=null) ? I18N[curLang][key]
+          : (I18N.zh[key]!=null ? I18N.zh[key] : key);
+    if(params){ for(var k in params){ s = String(s).replace(new RegExp("\\{"+k+"\\}","g"), params[k]); } }
+    return s;
+  }
+  function applyLang(lang){
+    curLang = lang;
+    document.documentElement.lang = LANG_ATTR[lang] || "zh-CN";
+    document.title = t("title");
+    var nodes = document.querySelectorAll("[data-i18n]");
+    for(var i=0;i<nodes.length;i++){ nodes[i].textContent = t(nodes[i].getAttribute("data-i18n")); }
+    var phs = document.querySelectorAll("[data-i18n-ph]");
+    for(var j=0;j<phs.length;j++){ phs[j].setAttribute("placeholder", t(phs[j].getAttribute("data-i18n-ph"))); }
+    var htmls = document.querySelectorAll("[data-i18n-html]");
+    for(var h=0;h<htmls.length;h++){ htmls[h].innerHTML = t(htmls[h].getAttribute("data-i18n-html")); }
+    updateLockUI();
+    updateStrength();
+    getHistory().then(render);
+    try{ localStorage.setItem(LANG_KEY, lang); }catch(e){}
+  }
+
+  // ---------- charset / random ----------
+  var SETS = {
+    upper:"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    lower:"abcdefghijklmnopqrstuvwxyz",
+    num:"0123456789",
+    sym:"!@#$%^&*()-_=+[]{};:,.<>?/"
+  };
+  var AMBIG = "O0oIl1|`'\"";
+
+  var $ = function(id){ return document.getElementById(id); };
+  var pwEl=$("pw"), lenEl=$("len"), lenVal=$("lenVal");
+  var cUpper=$("cUpper"), cLower=$("cLower"), cNum=$("cNum"), cSym=$("cSym"), cNoAmb=$("cNoAmb"), cNoDup=$("cNoDup");
+  var bar=$("bar"), stxt=$("stxt"), entropyEl=$("entropy");
+  var histEl=$("hist"), countEl=$("count");
+  var masterEl=$("master"), lockState=$("lockState");
+  var STORE_KEY="pwgen.history.v1";
+  var encEnabled=false;
+
+  function randInt(max){
+    var limit = Math.floor(0xFFFFFFFF / max) * max;
+    var buf = new Uint32Array(1);
+    var x;
+    do { crypto.getRandomValues(buf); x = buf[0]; } while (x >= limit);
+    return x % max;
+  }
+  function pick(str){ return str.charAt(randInt(str.length)); }
+
+  function buildPool(){
+    var pool="";
+    if(cUpper.checked) pool+=SETS.upper;
+    if(cLower.checked) pool+=SETS.lower;
+    if(cNum.checked) pool+=SETS.num;
+    if(cSym.checked) pool+=SETS.sym;
+    if(cNoAmb.checked){
+      var out="";
+      for(var i=0;i<pool.length;i++){ if(AMBIG.indexOf(pool[i])<0) out+=pool[i]; }
+      pool=out;
+    }
+    return pool;
+  }
+
+  function generate(){
+    var pool=buildPool();
+    if(!pool){ toast(t("noCharset")); return null; }
+    var len=parseInt(lenEl.value,10);
+    if(cNoDup.checked && len>pool.length){ toast(t("dupTooLong",{n:pool.length})); return null; }
+
+    var chars=[];
+    var used={};
+    var sets=[];
+    if(cUpper.checked) sets.push(SETS.upper);
+    if(cLower.checked) sets.push(SETS.lower);
+    if(cNum.checked) sets.push(SETS.num);
+    if(cSym.checked) sets.push(SETS.sym);
+    if(cNoAmb.checked){ sets=sets.map(function(s){var o="";for(var i=0;i<s.length;i++){if(AMBIG.indexOf(s[i])<0)o+=s[i];}return o;}); }
+    sets=sets.filter(function(s){return s.length>0;});
+
+    for(var s=0; s<sets.length && chars.length<len; s++){
+      var ch=pick(sets[s]);
+      if(cNoDup.checked){ if(used[ch]){ s--; continue; } used[ch]=1; }
+      chars.push(ch);
+    }
+    while(chars.length<len){
+      var c=pick(pool);
+      if(cNoDup.checked){ if(used[c]) continue; used[c]=1; }
+      chars.push(c);
+    }
+    for(var i=chars.length-1;i>0;i--){ var j=randInt(i+1); var tt=chars[i]; chars[i]=chars[j]; chars[j]=tt; }
+    return chars.join("");
+  }
+
+  function calcEntropy(poolLen,len){
+    if(!poolLen||!len) return 0;
+    return +(len*Math.log2(poolLen)).toFixed(1);
+  }
+  function strengthLabel(e){
+    if(e<28) return ["vWeak","#ff5468"];
+    if(e<40) return ["weak","#ff8a3d"];
+    if(e<60) return ["mid","#f5a524"];
+    if(e<80) return ["strong","#1bbf73"];
+    return ["vStrong","#00c2a8"];
+  }
+
+  function updateStrength(){
+    var pool=buildPool();
+    var e=calcEntropy(pool.length, parseInt(lenEl.value,10));
+    var lab=strengthLabel(e);
+    bar.style.width=Math.min(100,e)+"%";
+    bar.style.background=lab[1];
+    stxt.textContent=t(lab[0]);
+    stxt.style.color=lab[1];
+    entropyEl.textContent=e;
+  }
+
+  // ---------- storage ----------
+  function load(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)||"[]"); }catch(e){ return []; }
+  }
+  function save(arr){
+    if(encEnabled){
+      encryptStore(arr).then(function(b64){
+        localStorage.setItem(STORE_KEY, JSON.stringify({enc:true, data:b64}));
+        render(arr);
+      });
+    } else {
+      localStorage.setItem(STORE_KEY, JSON.stringify(arr));
+      render(arr);
+    }
+  }
+
+  function deriveKey(pass){
+    var enc=new TextEncoder();
+    return crypto.subtle.importKey("raw", enc.encode(pass), {name:"PBKDF2"}, false, ["deriveKey"])
+      .then(function(k){
+        return crypto.subtle.deriveKey(
+          {name:"PBKDF2", salt:enc.encode("pwgen-salt-v1"), iterations:150000, hash:"SHA-256"},
+          k, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+      });
+  }
+  function encryptStore(arr){
+    var pass=masterEl.value;
+    if(!pass) return Promise.reject("no master");
+    var iv=crypto.getRandomValues(new Uint8Array(12));
+    var data=enc.encode(JSON.stringify(arr));
+    return deriveKey(pass).then(function(key){
+      return crypto.subtle.encrypt({name:"AES-GCM", iv:iv}, key, data);
+    }).then(function(ct){
+      var combined=new Uint8Array(iv.length+ct.byteLength);
+      combined.set(iv,0); combined.set(new Uint8Array(ct), iv.length);
+      return btoa(String.fromCharCode.apply(null, combined));
+    });
+  }
+  function decryptStore(b64){
+    var pass=masterEl.value;
+    if(!pass) return Promise.reject("no master");
+    var combined=Uint8Array.from(atob(b64), function(c){return c.charCodeAt(0);});
+    var iv=combined.slice(0,12), ct=combined.slice(12);
+    return deriveKey(pass).then(function(key){
+      return crypto.subtle.decrypt({name:"AES-GCM", iv:iv}, key, ct);
+    }).then(function(pt){ return JSON.parse(new TextDecoder().decode(pt)); });
+  }
+
+  function getHistory(){
+    var raw=localStorage.getItem(STORE_KEY);
+    if(!raw) return Promise.resolve([]);
+    try{
+      var obj=JSON.parse(raw);
+      if(obj && obj.enc){
+        encEnabled=true; updateLockUI();
+        if(!masterEl.value){ return Promise.resolve(null); }
+        return decryptStore(obj.data).catch(function(){ toast(t("wrongMaster")); return []; });
+      }
+      return Promise.resolve(obj);
+    }catch(e){ return Promise.resolve([]); }
+  }
+
+  function render(arr){
+    if(!arr){ histEl.innerHTML='<div class="empty-hist">'+t("lockedHist")+'</div>'; countEl.textContent=t("encrypted"); return; }
+    if(!arr.length){ histEl.innerHTML='<div class="empty-hist">'+t("emptyHist")+'</div>'; countEl.textContent=t("count",{n:0}); return; }
+    countEl.textContent=t("count",{n:arr.length});
+    histEl.innerHTML="";
+    arr.slice().reverse().forEach(function(it){
+      var d=document.createElement("div"); d.className="item";
+      var p=document.createElement("div"); p.className="p"; p.textContent=it.pw;
+      var tm=document.createElement("div"); tm.className="t"; tm.textContent=fmtTime(it.ts);
+      var c=document.createElement("button"); c.className="mini";
+      c.textContent = (curLang==="en") ? "Copy" : (curLang==="ja") ? "コピー" : (curLang==="zh-t") ? "複製" : "复制";
+      c.onclick=function(){ copy(it.pw); };
+      var del=document.createElement("button"); del.className="mini del";
+      del.textContent = (curLang==="en") ? "Delete" : (curLang==="ja") ? "削除" : (curLang==="zh-t") ? "刪除" : "删除";
+      del.onclick=function(){
+        if(encEnabled){
+          decryptStore(JSON.parse(localStorage.getItem(STORE_KEY)).data).then(function(real){
+            real=real.filter(function(x){return x.id!==it.id;});
+            save(real);
+          });
+        } else {
+          var list=load().filter(function(x){return x.id!==it.id;});
+          save(list);
+        }
+      };
+      d.appendChild(p); d.appendChild(tm); d.appendChild(c); d.appendChild(del);
+      histEl.appendChild(d);
+    });
+  }
+
+  function fmtTime(ts){
+    var d=new Date(ts);
+    var p=function(n){return (n<10?"0":"")+n;};
+    return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());
+  }
+
+  function doGenerate(saveIt){
+    var pw=generate();
+    if(pw===null) return;
+    pwEl.textContent=pw; pwEl.classList.remove("empty");
+    updateStrength();
+    if(saveIt){
+      var rec={id:Date.now()+"-"+randInt(1e6), pw:pw, ts:Date.now(), len:pw.length};
+      getHistory().then(function(arr){
+        arr = arr||[];
+        arr.push(rec);
+        save(arr);
+        toast(t("saved"));
+      });
+    }
+  }
+
+  function copy(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ toast(t("copied")); }, function(){ fallbackCopy(text); });
+    } else fallbackCopy(text);
+  }
+  function fallbackCopy(text){
+    var ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast(t("copied")); }catch(e){ toast(t("copyFail")); }
+    document.body.removeChild(ta);
+  }
+
+  function toast(msg){
+    var el=$("toast"); el.textContent=msg; el.classList.add("show");
+    clearTimeout(el._t); el._t=setTimeout(function(){ el.classList.remove("show"); },1600);
+  }
+
+  function updateLockUI(){
+    lockState.textContent = encEnabled ? t("lockOn") : t("lockOff");
+    lockState.style.color = encEnabled ? "var(--green)" : "var(--ink)";
+  }
+
+  // ---------- events ----------
+  lenEl.oninput=function(){ lenVal.textContent=lenEl.value; updateStrength(); };
+  [cUpper,cLower,cNum,cSym,cNoAmb,cNoDup].forEach(function(c){ c.onchange=updateStrength; });
+  $("genBtn").onclick=function(){ doGenerate(false); };
+  $("genOnly").onclick=function(){ doGenerate(false); };
+  $("genSave").onclick=function(){ doGenerate(true); };
+  $("copyBtn").onclick=function(){ if(pwEl.textContent && !pwEl.classList.contains("empty")) copy(pwEl.textContent); };
+  $("fillBtn").onclick=function(){ if(masterEl.value) toast(t("masterSet")); else masterEl.focus(); };
+
+  masterEl.oninput=function(){
+    encEnabled = masterEl.value.length>0;
+    updateLockUI();
+    getHistory().then(render);
+  };
+  lockState.onclick=function(){
+    if(masterEl.value) { encEnabled=true; updateLockUI(); getHistory().then(render); toast(t("lockOn")); }
+    else toast(t("needMaster"));
+  };
+
+  $("clearBtn").onclick=function(){
+    if(!confirm(t("confirmClear"))) return;
+    if(encEnabled){
+      encryptStore([]).then(function(b64){ localStorage.setItem(STORE_KEY, JSON.stringify({enc:true,data:b64})); render([]); toast(t("cleared")); });
+    } else { localStorage.removeItem(STORE_KEY); render([]); toast(t("cleared")); }
+  };
+
+  $("exportBtn").onclick=function(){
+    getHistory().then(function(arr){
+      if(!arr||!arr.length){ toast(t("noExport")); return; }
+      var csv="时间,密码,长度\n"+arr.map(function(it){return fmtTime(it.ts)+","+it.pw+","+it.len;}).join("\n");
+      var blob=new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8"});
+      var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+      a.download="password-history.csv"; a.click();
+      toast(t("exported"));
+    });
+  };
+
+  // language selector
+  var langSel=$("lang");
+  for(var code in LANGS){
+    if(!LANGS.hasOwnProperty(code)) continue;
+    var o=document.createElement("option"); o.value=code; o.textContent=LANGS[code]; langSel.appendChild(o);
+  }
+  langSel.value=curLang;
+  langSel.onchange=function(){ applyLang(langSel.value); };
+
+  // init
+  // ---------- tabs UI ----------
+  var TAB_KEY="pwgen.tab.v1";
+  function setTab(name){
+    var names=["gen","hist","faq"];
+    for(var i=0;i<names.length;i++){
+      var p=document.getElementById("pane-"+names[i]);
+      if(p) p.classList.toggle("on", names[i]===name);
+    }
+    var ts=document.querySelectorAll("#tabSwitch .tab");
+    for(var j=0;j<ts.length;j++){ ts[j].classList.toggle("on", ts[j].getAttribute("data-tab")===name); }
+    try{ localStorage.setItem(TAB_KEY, name); }catch(e){}
+  }
+  (function(){
+    var sw=document.getElementById("tabSwitch");
+    if(!sw) return;
+    sw.addEventListener("click",function(e){
+      var b=e.target.closest ? e.target.closest(".tab") : null;
+      if(b) setTab(b.getAttribute("data-tab"));
+    });
+    var saved=null; try{ saved=localStorage.getItem(TAB_KEY); }catch(e){}
+    setTab(saved && ["gen","hist","faq"].indexOf(saved)>=0 ? saved : "gen");
+  })();
+
+  applyLang(curLang);
+})();
+</script>
+</body>
+</html>
