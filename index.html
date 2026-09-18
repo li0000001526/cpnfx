@@ -193,18 +193,15 @@
     box-shadow:0 12px 30px rgba(27,191,115,.35);
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-/* pwgen tabs ui */
-.tabs{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
-.tab{flex:1 1 150px;min-width:132px;border:1px solid var(--hair);background:rgba(255,255,255,.55);color:var(--muted);border-radius:13px;padding:11px 14px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:border-color .15s,background .15s,color .15s,box-shadow .15s}
-.tab:hover{border-color:var(--violet);color:var(--ink)}
-.tab.on{background:linear-gradient(135deg,var(--violet),var(--pink));border-color:transparent;color:#fff;box-shadow:0 10px 24px rgba(124,92,255,.35)}
-.tabpane{display:none}
-.tabpane.on{display:block;animation:pwin .18s ease}
-@keyframes pwin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.faq h3{margin:18px 0 6px;font-size:14.5px;color:var(--ink);font-weight:700}
-.faq .faqp,.faq .faqs{color:var(--muted);font-size:13.5px;line-height:1.75;margin:0}
-.faq a{color:var(--violet);font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(124,92,255,.4)}
-.faq a:hover{border-bottom-style:solid}
+/* cpnfx bottom seo sections */
+.gsec h3{margin:16px 0 6px;font-size:14.5px;color:var(--ink);font-weight:700}
+.gsec .faqp,.gsec .faqs{color:var(--muted);font-size:13.5px;line-height:1.75;margin:0}
+.gsec a{color:var(--violet);font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(124,92,255,.4)}
+.gsec a:hover{border-bottom-style:solid}
+.flinks-sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+.flinks-chips{display:flex;flex-wrap:wrap;gap:9px}
+.wlink{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--hair);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--ink);text-decoration:none;font-weight:600;transition:transform .06s,border-color .15s,box-shadow .15s;cursor:pointer}
+.wlink:hover{border-color:var(--violet);box-shadow:0 6px 16px rgba(124,92,255,.18);transform:translateY(-1px)}
 .opt>span{white-space:nowrap}
 </style>
 </head>
@@ -219,16 +216,12 @@
     <select id="lang" class="langsel" aria-label="Language"></select>
   </header>
 
-<div class="tabs" id="tabSwitch" role="tablist">
-  <button class="tab on" data-tab="gen" role="tab">⚡ <span data-i18n="tabGen">生成密码</span></button>
-  <button class="tab" data-tab="hist" role="tab">🕘 <span data-i18n="tabHist">历史记录</span></button>
-  <button class="tab" data-tab="faq" role="tab">🛡 <span data-i18n="tabFaq">安全 FAQ</span></button>
-</div>
-<div class="tabpane on" id="pane-gen">
-<div class="warn">
+  <div class="warn">
     <span>🔐</span>
     <div data-i18n="warn">安全说明：本工具完全在你的浏览器本地运行，密码不会上传任何服务器。历史记录默认以明文保存在本机 localStorage，同设备其他用户可读。如需更高安全，请开启下方的「主密码加密保存」（AES-GCM，密钥不出本机）。请勿在公共/共享电脑记录敏感账号密码。</div>
-<!-- 生成区 -->
+  </div>
+
+  <!-- 生成区 -->
   <section class="sec">
     <h2><span class="dot"></span><span data-i18n="secGen">生成密码</span></h2>
     <div class="pwbox">
@@ -263,9 +256,8 @@
       <button class="btn violet" id="fillBtn" data-i18n="fillBtn">填入主密码</button>
     </div>
   </section>
-</div>
-<div class="tabpane" id="pane-hist">
-<!-- 历史区 -->
+
+  <!-- 历史区 -->
   <section class="sec">
     <h2><span class="dot" style="background:var(--violet);box-shadow:0 0 10px var(--violet)"></span><span data-i18n="secHist">历史记录</span></h2>
 
@@ -282,13 +274,12 @@
     </div>
     <div class="hist" id="hist"><div class="empty-hist" data-i18n="emptyHist">还没有记录，先生成一个吧。</div></div>
   </section>
-</div>
-<div class="tabpane" id="pane-faq">
 
-<!-- 安全FAQ区 -->
-<section class="sec faq">
-  <h2><span class="dot" style="background:var(--pink);box-shadow:0 0 10px var(--pink)"></span><span data-i18n="faqTitle">密码安全指南</span></h2>
-  <p class="faqs" data-i18n-html="faqSub">四个最常见的问题：随机生成为什么比自编更安全、多长才算「强」、该不该用密码管理器、本地历史记录如何保管。</p>
+  
+<!-- cpnfx-bottom-seo -->
+<section class="sec gsec">
+  <h2><span class="dot" style="background:var(--pink);box-shadow:0 0 10px var(--pink)"></span><span data-i18n="secGuide">密码安全指南</span></h2>
+  <p class="faqs" data-i18n="guideSub">随机生成为何比自己编的更安全、多长才算「强」、该不该用密码管理器、本地历史如何保管——并附权威标准参考。</p>
   <h3 data-i18n="faqQ1">为什么随机密码生成器比自己编的密码更安全？</h3>
   <p class="faqp" data-i18n-html="faqA1">人脑擅长记模式——生日、拼音、「123456」式后缀，而撞库与离线破解专打这类规律。随机生成让每个字符独立且均匀分布：8 位混合约 51 bit（已属弱），12 位约 77 bit（强），16 位约 103 bit（极强），暴力成本随长度指数上升。口令设计规范参考 <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>。</p>
   <h3 data-i18n="faqQ2">多长的密码才算「强」？</h3>
@@ -298,7 +289,17 @@
   <h3 data-i18n="faqQ4">本工具的历史记录安全吗？</h3>
   <p class="faqp" data-i18n-html="faqA4">历史默认以明文保存在本机 localStorage——同设备其他用户可读；开启「主密码加密保存」后以 AES-GCM（PBKDF2 15 万次迭代）加密，密钥不出本机。请勿在公共/共享电脑上保存敏感口令。</p>
 </section>
-</div>
+<section class="sec flinks">
+  <h2><span class="dot" style="background:var(--cyan);box-shadow:0 0 10px var(--cyan)"></span><span data-i18n="secFlinks">友情链接</span></h2>
+  <p class="flinks-sub" data-i18n="flinksSub">更多免费在线工具（li00000 工具集）：</p>
+  <div class="flinks-chips">
+    <a class="wlink" href="https://tjtkw.li00000.xyz/" target="_blank" rel="noopener"><span data-i18n="flTjtkw">💪 健身体脂计算器</span></a>
+    <a class="wlink" href="https://calsa.li00000.xyz/" target="_blank" rel="noopener"><span data-i18n="flCalsa">🕐 时区时差计算器</span></a>
+    <a class="wlink" href="https://bmuws.li00000.xyz/" target="_blank" rel="noopener"><span data-i18n="flBmuws">🍰 烘焙食谱计算器</span></a>
+    <a class="wlink" href="https://dmosj.li00000.xyz/" target="_blank" rel="noopener"><span data-i18n="flDmosj">🔳 二维码生成器</span></a>
+    <a class="wlink" href="https://dosif.li00000.xyz/" target="_blank" rel="noopener"><span data-i18n="flDosif">🎹 幻音钢琴</span></a>
+  </div>
+</section>
 <footer id="foot" data-i18n-html="footer">所有计算在本地完成 · 随机源 <code>crypto.getRandomValues</code> · 数据存于本机浏览器<br/>本工具不收集任何信息。请妥善保管设备与主密码。</footer>
 </div>
 
@@ -311,13 +312,13 @@
   // ---------- i18n ----------
   var I18N = {
     zh:{
-      tabGen:"生成密码", tabHist:"历史记录", tabFaq:"安全 FAQ",
-      faqTitle:"密码安全指南", faqSub:"四个最常见的问题：随机生成为什么比自编更安全、多长才算「强」、该不该用密码管理器、本地历史记录如何保管。",
+      secGuide:"密码安全指南", guideSub:"随机生成为何比自己编的更安全、多长才算「强」、该不该用密码管理器、本地历史如何保管——并附权威标准参考。",
       faqQ1:"为什么随机密码生成器比自己编的密码更安全？", faqA1:'人脑擅长记模式——生日、拼音、「123456」式后缀，而撞库与离线破解专打这类规律。随机生成让每个字符独立且均匀分布：8 位混合约 51 bit（已属弱），12 位约 77 bit（强），16 位约 103 bit（极强），暴力成本随长度指数上升。口令设计规范参考 <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>。',
       faqQ2:"多长的密码才算「强」？", faqA2:'熵(bit) ≈ 长度 × log₂(字符池)。86 字符池（大小写+数字+符号）：8 位≈51 bit，12 位≈77 bit，16 位≈103 bit，24 位≈154 bit。经验值：登录类账号 ≥ 16 位；支付、主邮箱、SSH 等高价值账号 ≥ 24 位，且绝不跨站复用。更多标准见 <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP 认证安全清单</a>。',
       faqQ3:"该不该用密码管理器？", faqA3:'建议用：它让「每个账号一个唯一长密码」可行——你只需记住一个主口令。主流选择：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（开源、可自托管）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（跨生态体验好）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google 密码管理器</a>（Chrome 生态开箱即用）。用本工具「生成并保存」批量生成后导出 CSV 即可导入。',
       faqQ4:"本工具的历史记录安全吗？", faqA4:'历史默认以明文保存在本机 localStorage——同设备其他用户可读；开启「主密码加密保存」后以 AES-GCM（PBKDF2 15 万次迭代）加密，密钥不出本机。请勿在公共/共享电脑上保存敏感口令。',
-
+      secFlinks:"友情链接", flinksSub:"更多免费在线工具（li00000 工具集）：",
+      flTjtkw:"💪 健身体脂计算器", flCalsa:"🕐 时区时差计算器", flBmuws:"🍰 烘焙食谱计算器", flDmosj:"🔳 二维码生成器", flDosif:"🎹 幻音钢琴",
       title:"密钥工坊 · 密码生成器", sub:"纯前端 · 本地生成 · 可记录历史",
       warn:"安全说明：本工具完全在你的浏览器本地运行，密码不会上传任何服务器。历史记录默认以明文保存在本机 localStorage，同设备其他用户可读。如需更高安全，请开启下方的「主密码加密保存」（AES-GCM，密钥不出本机）。请勿在公共/共享电脑记录敏感账号密码。",
       secGen:"生成密码", pwPlaceholder:"点击「生成」创建密码", len:"长度",
@@ -338,13 +339,13 @@
       vWeak:"极弱", weak:"弱", mid:"中等", strong:"强", vStrong:"极强"
     },
     "zh-t":{
-      tabGen:"生成密碼", tabHist:"歷史記錄", tabFaq:"安全 FAQ",
-      faqTitle:"密碼安全指南", faqSub:"四個最常見的問題：隨機生成為何比自编更安全、多長才算「強」、該不該用密碼管理器、本機歷史記錄如何保管。",
-      faqQ1:"為什麼隨機密碼生成器比自编的密碼更安全？", faqA1:'大腦擅長記模式——生日、拼音、「123456」式結尾，而撞庫與離線破解專打這類規律。隨機生成讓每個字元獨立且均勻分布：8 位混合約 51 bit（已屬弱），12 位約 77 bit（強），16 位約 103 bit（極強），暴力成本隨長度指數上升。口令設計規範參考 <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>。',
+      secGuide:"密碼安全指南", guideSub:"隨機產生器為何比自编更安全、多長才算「強」、該不該用密碼管理器、本機歷史如何保管——並附權威標準參考。",
+      faqQ1:"為什麼隨機密碼產生器比自编的密碼更安全？", faqA1:'大腦擅長記模式——生日、拼音、「123456」式結尾，而撞庫與離線破解專打這類規律。隨機生成讓每個字元獨立且均勻分布：8 位混合約 51 bit（已屬弱），12 位約 77 bit（強），16 位約 103 bit（極強），暴力成本隨長度指數上升。口令設計規範參考 <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>。',
       faqQ2:"多長的密碼才算「強」？", faqA2:'熵(bit) ≈ 長度 × log₂(字元池)。86 字元池（大小寫+數字+符號）：8 位≈51 bit，12 位≈77 bit，16 位≈103 bit，24 位≈154 bit。經驗值：登入類帳號 ≥ 16 位；支付、主郵箱、SSH 等高價值帳號 ≥ 24 位，且絕不跨站重用。更多標準見 <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP 鑑別安全清單</a>。',
       faqQ3:"該不該用密碼管理器？", faqA3:'建議用：它讓「每個帳號一個唯一長密碼」可行——你只需記住一個主口令。主流選擇：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（開源、可自託管）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（跨生態體驗佳）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google 密碼管理器</a>（Chrome 生態開箱即用）。用本工具「生成並保存」批量產生後匯出 CSV 即可導入。',
       faqQ4:"本工具的歷史記錄安全嗎？", faqA4:'歷史預設以明文保存在本機 localStorage——同裝置其他使用者可讀；開啟「主密碼加密保存」後以 AES-GCM（PBKDF2 15 萬次迭代）加密，金鑰不出本機。請勿在公共／共用電腦上保存敏感口令。',
-
+      secFlinks:"友情鏈接", flinksSub:"更多免費在線工具（li00000 工具集）：",
+      flTjtkw:"💪 健身體脂計算器", flCalsa:"🕐 時區時差計算器", flBmuws:"🍰 烘焙食譜計算器", flDmosj:"🔳 二維碼產生器", flDosif:"🎹 幻音鋼琴",
       title:"密鑰工坊 · 密碼產生器", sub:"純前端 · 本地生成 · 可記錄歷史",
       warn:"安全說明：本工具完全在你的瀏覽器本地運行，密碼不會上傳任何伺服器。歷史記錄預設以明文保存在本機 localStorage，同裝置其他使用者可讀。如需更高安全，請開啟下方的「主密碼加密保存」（AES-GCM，金鑰不出本機）。請勿在公共／共用電腦記錄敏感帳號密碼。",
       secGen:"生成密碼", pwPlaceholder:"點擊「生成」建立密碼", len:"長度",
@@ -365,13 +366,13 @@
       vWeak:"極弱", weak:"弱", mid:"中等", strong:"強", vStrong:"極強"
     },
     en:{
-      tabGen:"Generate", tabHist:"History", tabFaq:"Security FAQ",
-      faqTitle:"Password Security Guide", faqSub:"The four questions that matter: why random beats typed, how long is strong, should you use a password manager, and how local history is kept safe.",
-      faqQ1:"Why is a random generator safer than a password you make yourself?", faqA1:'Humans remember patterns — birthdays, pinyin, "123456" suffixes — and credential-stuffing and offline cracking target exactly those. A random generator keeps every character independent and uniform: 8 mixed chars ≈ 51 bits (already weak), 12 ≈ 77 bits (strong), 16 ≈ 103 bits (very strong); brute-force cost grows exponentially with length. For credential policy see <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>.',
+      secGuide:"Password Security Guide", guideSub:"Why a random generator beats typed passwords, how long is strong, when to use a password manager, and how local history is kept safe — with authoritative references.",
+      faqQ1:"Why is a random generator safer than a password you type yourself?", faqA1:'Humans remember patterns — birthdays, pinyin, "123456" suffixes — and credential-stuffing and offline cracking target exactly those. A random generator keeps every character independent and uniform: 8 mixed chars ≈ 51 bits (already weak), 12 ≈ 77 (strong), 16 ≈ 103 (very strong); brute-force cost grows exponentially with length. Credential policy: <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a>.',
       faqQ2:"How long must a password be to count as strong?", faqA2:'Entropy (bits) ≈ length × log₂(pool). With the 86-char pool (upper + lower + digits + symbols): 8 ≈ 51 bits, 12 ≈ 77, 16 ≈ 103, 24 ≈ 154. Rules of thumb: ≥ 16 chars for login accounts; ≥ 24 for high-value ones (payments, primary inbox, SSH), and never reuse across sites. More standards: the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP Authentication Cheat Sheet</a>.',
-      faqQ3:"Should you use a password manager?", faqA3:'Yes — it makes a unique long password per account practical: you only memorize one master passphrase. Popular choices: <a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a> (open source, self-hostable), <a href="https://1password.com/" target="_blank" rel="noopener">1Password</a> (polished cross-platform), <a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google Password Manager</a> (built into Chrome). Generate a batch here with "Generate & Save", export CSV, and import it into the manager.',
+      faqQ3:"Should you use a password manager?", faqA3:'Yes — it makes a unique long password per account practical: you only memorize one master passphrase. Popular choices: <a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a> (open source, self-hostable), <a href="https://1password.com/" target="_blank" rel="noopener">1Password</a> (polished cross-platform), <a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google Password Manager</a> (built into Chrome). Generate a batch here, export CSV, and import it into the manager.',
       faqQ4:"Is this tool's history safe?", faqA4:"History is stored in plaintext in your browser's localStorage by default — readable by anyone on this device. Enable encrypted save and it becomes AES-GCM (PBKDF2, 150,000 iterations); the key never leaves the device. Never keep sensitive credentials on public or shared computers.",
-
+      secFlinks:"More Free Tools", flinksSub:"More free online tools from the li00000 collection:",
+      flTjtkw:"💪 Body Fat / BMI Calculator", flCalsa:"🕐 Time Zone & Countdown", flBmuws:"🍰 Baking Recipe Calculator", flDmosj:"🔳 QR Code Generator", flDosif:"🎹 Aurora Piano",
       title:"KeyForge · Password Generator", sub:"Client-side · Local generation · History saved",
       warn:"Security note: This tool runs entirely in your browser locally. Passwords are never uploaded to any server. History is stored in plaintext in this device's localStorage by default, readable by other users on the same device. For higher security, enable \"Encrypted save with master password\" below (AES-GCM, key never leaves device). Do not store sensitive credentials on public/shared computers.",
       secGen:"Generate", pwPlaceholder:"Click \"Generate\" to create", len:"Length",
@@ -392,13 +393,13 @@
       vWeak:"Very weak", weak:"Weak", mid:"Medium", strong:"Strong", vStrong:"Very strong"
     },
     ja:{
-      tabGen:"生成", tabHist:"履歴", tabFaq:"セキュリティ FAQ",
-      faqTitle:"パスワード安全ガイド", faqSub:"よくある4つの疑問：なぜランダム生成が自编より安全か、どの長さが「強い」のか、パスワードマネージャを使うべきか、履歴の保管方法。",
-      faqQ1:"なぜランダム生成の方が自编のパスワードより安全？", faqA1:'人間はパターン（生年月日、ピンイン、「123456」の続き）を記憶しやすい。クレデンシャルスタッフィングやオフライン総当たり攻撃はまさにその類を狙います。ランダム生成は各文字を独立・均匀分布させます：8桁（86文字プール）≈51 bit（弱）、12桁≈77 bit（強）、16桁≈103 bit（極強）——長度が上がるほど総当たりコストは指数的に増えます。認証方針は <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a> を参照。',
+      secGuide:"パスワード安全ガイド", guideSub:"ランダム生成がなぜ自分で編むパスワードより安全か、どの長さが「強い」か、パスワードマネージャーを使うべきか、履歴の保管方法——権威ある基準も参照。",
+      faqQ1:"なぜランダム生成の方が自分で編んだパスワードより安全？", faqA1:'人間はパターン（生年月日、ピンイン、「123456」の続き）を記憶しやすい。クレデンシャルスタッフィングやオフライン総当たり攻撃はまさにその類を狙います。ランダム生成は各文字を独立・均匀分布させます：8桁（86文字プール）≈51 bit（弱）、12桁≈77 bit（強）、16桁≈103 bit（極強）——長さが増えるほど総当たりコストは指数的に高くなります。認証方針は <a href="https://csrc.nist.gov/pubs/sp/800/63/b/final" target="_blank" rel="noopener">NIST SP 800-63B</a> を参照。',
       faqQ2:"どの長さのパスワードが「強め」と言える？", faqA2:'エントロピー(bit) ≒ 長さ × log₂(文字プール)。86文字プール（大文字＋小文字＋数字＋記号）では：8桁≒51 bit、12桁≒77 bit、16桁≒103 bit、24桁≒154 bit。目安：ログイン用は16桁以上、高価値アカウント（決済・メインメール・SSH）は24桁以上、サイト横断での再利用は避けること。基準は <a href="https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP 認証チートシート</a>。',
-      faqQ3:"パスワードマネージャは使った方が良い？", faqA3:'はい。アカウントごとに固有の長いパスワードを実用化する助けになり、覚えておくのはマスターパスワード1つだけで済みます。主な選択肢：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（オープンソース・セルフホスト可）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（クロスプラットフォームで体験良好）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google パスワードマネージャ</a>（Chrome に標準搭載）。ここでは「生成して保存」でまとめて作り、CSV を出力してインポートするのがスムーズ。',
+      faqQ3:"パスワードマネージャーは使った方が良い？", faqA3:'はい。アカウントごとに固有の長いパスワードを実用化する助けになり、覚えておくのはマスターパスワード1つだけで済みます。主な選択肢：<a href="https://bitwarden.com/" target="_blank" rel="noopener">Bitwarden</a>（オープンソース・セルフホスト可）、<a href="https://1password.com/" target="_blank" rel="noopener">1Password</a>（クロスプラットフォームで体験良好）、<a href="https://support.google.com/accounts/answer/6289203" target="_blank" rel="noopener">Google パスワードマネージャー</a>（Chrome に標準搭載）。ここではまとめて生成して CSV を出力し、マネージャーにインポートするのがスムーズ。',
       faqQ4:"このツールの履歴は安全？", faqA4:'履歴は標準で本体ブラウザの localStorage に平文保存——同一デバイスの他ユーザーが読める可能性があります。「マスターパスワードで暗号化保存」を有効化すると AES-GCM（PBKDF2・15万イテレーション）で暗号化され、鍵は端末外に出ません。公共・共有端末で重要な認証情報を保存しないでください。',
-
+      secFlinks:"関連ツール", flinksSub:"その他の無料オンラインツール（li00000 集合）：",
+      flTjtkw:"💪 体組成計算（BMI/体脂肪）", flCalsa:"🕐 時差・カウントダウン", flBmuws:"🍰 焼菓子レシピ計算", flDmosj:"🔳 QRコード生成", flDosif:"🎹 アウローラピアノ",
       title:"キーフォージ · パスワード生成器", sub:"クライアント側 · ローカル生成 · 履歴保存",
       warn:"セキュリティ注意：このツールはすべてブラウザ内（ローカル）で動作し、パスワードをサーバーに送信することはありません。履歴は標準で平文のまま本デバイスの localStorage に保存され、同一デバイスの他ユーザーが読める可能性があります。より安全にするには、下の「マスターパスワードで暗号化保存」（AES-GCM、鍵は端末外に出ない）を有効化してください。公共／共有端末で重要な認証情報を保存しないでください。",
       secGen:"パスワード生成", pwPlaceholder:"「生成」を押して作成", len:"長さ",
@@ -727,29 +728,6 @@
   langSel.onchange=function(){ applyLang(langSel.value); };
 
   // init
-  // ---------- tabs UI ----------
-  var TAB_KEY="pwgen.tab.v1";
-  function setTab(name){
-    var names=["gen","hist","faq"];
-    for(var i=0;i<names.length;i++){
-      var p=document.getElementById("pane-"+names[i]);
-      if(p) p.classList.toggle("on", names[i]===name);
-    }
-    var ts=document.querySelectorAll("#tabSwitch .tab");
-    for(var j=0;j<ts.length;j++){ ts[j].classList.toggle("on", ts[j].getAttribute("data-tab")===name); }
-    try{ localStorage.setItem(TAB_KEY, name); }catch(e){}
-  }
-  (function(){
-    var sw=document.getElementById("tabSwitch");
-    if(!sw) return;
-    sw.addEventListener("click",function(e){
-      var b=e.target.closest ? e.target.closest(".tab") : null;
-      if(b) setTab(b.getAttribute("data-tab"));
-    });
-    var saved=null; try{ saved=localStorage.getItem(TAB_KEY); }catch(e){}
-    setTab(saved && ["gen","hist","faq"].indexOf(saved)>=0 ? saved : "gen");
-  })();
-
   applyLang(curLang);
 })();
 </script>
